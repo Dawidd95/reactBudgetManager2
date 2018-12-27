@@ -1,3 +1,8 @@
+// OGOLNE
+// 1. Zmiana stylu css na click
+// 2. walidacja formualrza
+// 3. usuwanie elementu
+
 class App extends React.Component {
    state = {
       incomes: [],
@@ -9,7 +14,7 @@ class App extends React.Component {
       modalType: '',
       elementName: '',
       elementValue: '',
-      selected: 'all'
+      selected: 'Show All'
    }
 
    handleOpenModalClick = (type) => {
@@ -21,7 +26,9 @@ class App extends React.Component {
 
    handleCloseModalClick = () => {
       this.setState({
-         isOpen: false
+         isOpen: false,
+         elementName: '',
+         elementValue: ''
       })
    }
 
@@ -63,19 +70,31 @@ class App extends React.Component {
          incomes,
          expenses,
          totalBudget: prevState.totalIncome-prevState.totalExpense,
-         isOpen: false
+         isOpen: false,
+         elementName: '',
+         elementValue: ''
       }))
    }
 
-   handleFilterElementsClick = () => {
-
-   }
+   handleFilterElementsClick = (type) => {
+      this.setState({
+         selected: type
+      })
+   }  
 
    showElements = () => {
-      let incomes = this.state.incomes.map(currentElement => <ListElement {...currentElement}/>);
-      let expenses = this.state.expenses.map(currentElement => <ListElement {...currentElement}/>);
-
-      return [incomes, expenses];
+      switch (this.state.selected) {
+         case 'Show All': 
+            let incomes = this.state.incomes.map(currentElement => <ListElement {...currentElement}/>);
+            let expenses = this.state.expenses.map(currentElement => <ListElement {...currentElement}/>);
+            return [incomes, expenses];
+         case 'Show Incomes':
+            incomes = this.state.incomes.map(currentElement => <ListElement {...currentElement}/>);
+            return incomes;
+         case 'Show Expenses':
+            expenses = this.state.expenses.map(currentElement => <ListElement {...currentElement}/>);
+            return expenses;
+      }    
    }
 
    render() { 
@@ -259,7 +278,7 @@ const ButtonFilters = ({filterElementsClick}) => (
 )
 
 const Button = ({content, filterElementsClick}) => (
-   <button onClick={() => filterElementsClick()} className='filter-buttons__button'>{content}</button>
+   <button onClick={() => filterElementsClick(content)} className='filter-buttons__button'>{content}</button>
 )
 
 const ListElement = (props) => {
