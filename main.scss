@@ -9,7 +9,13 @@ li {
    
    display: flex;
    align-items: center;
+
+   &:last-child {
+      margin-bottom: 10px;
+   }
 }
+
+
 
 strong {
    margin-right: 10px;

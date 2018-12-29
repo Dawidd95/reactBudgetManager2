@@ -8,6 +8,8 @@ li {
   border-radius: 10px 20px 10px 20px;
   display: flex;
   align-items: center; }
+  li:last-child {
+    margin-bottom: 10px; }
 
 strong {
   margin-right: 10px; }

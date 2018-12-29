@@ -1,7 +1,5 @@
 // OGOLNE
 // 1. Zmiana stylu css na click
-// 2. walidacja formualrza
-// 3. usuwanie elementu
 
 class App extends React.Component {
    state = {
@@ -12,6 +10,7 @@ class App extends React.Component {
       totalBudget: 0,
       isOpen: false,
       modalType: '',
+      id: 0,
       elementName: '',
       elementValue: '',
       selected: 'Show All'
@@ -53,26 +52,78 @@ class App extends React.Component {
       this.state.elementValue = parseInt(this.state.elementValue,10);
 
       if(type === 'Add Income') {
-         incomes.push({name: this.state.elementName, value: this.state.elementValue, type: this.state.modalType});
-         
-         this.setState( prevState => ({
-            totalIncome: prevState.totalIncome+this.state.elementValue
-         }))
+         if(this.state.elementName !== '' && this.state.elementValue !== '' && this.state.elementValue > 0 && !isNaN(this.state.elementValue)) {
+            let sumIncomes = 0;
+
+            incomes.push({
+               id: this.state.id, name: this.state.elementName, value: this.state.elementValue, type: this.state.modalType
+            });
+
+            incomes.forEach(currentElement => {
+               sumIncomes += currentElement.value;
+            })
+            
+            this.setState( prevState => ({
+               totalIncome: sumIncomes,
+               id: prevState.id+1,
+            }))
+         }
       } else {
-         expenses.push({name: this.state.elementName, value: this.state.elementValue, type: this.state.modalType});
-         
-         this.setState( prevState => ({
-            totalExpense: prevState.totalExpense+this.state.elementValue
-         }))
+         if(this.state.elementName !== '' && this.state.elementValue !== '' && this.state.elementValue > 0 && !isNaN(this.state.elementValue)) {
+            let sumExpenses = 0;
+
+            expenses.push({
+               id: this.state.id, name: this.state.elementName, value: this.state.elementValue, type: this.state.modalType
+            });
+
+            expenses.forEach(currentElement => {
+               sumExpenses += currentElement.value;
+            })
+            
+            this.setState( prevState => ({
+               totalExpense: sumExpenses,
+               id: prevState.id+1,
+            }))
+         }
       }
 
       this.setState( prevState => ({
-         incomes,
-         expenses,
          totalBudget: prevState.totalIncome-prevState.totalExpense,
          isOpen: false,
          elementName: '',
          elementValue: ''
+      }))
+   }
+
+   handleRemoveElementClick = (id, type) => {
+      if(type === 'Add Income') {
+         let element = this.state.incomes;
+         let sumIncomes = 0;
+
+         element = element.filter(currentElement => currentElement.id !== id);
+
+         element.forEach(currentElement => sumIncomes += currentElement.value);
+
+         this.setState({
+            incomes: element,
+            totalIncome: sumIncomes,
+         })
+      } else {
+         let element = this.state.expenses;
+         let sumExpenses = 0;
+
+         element = element.filter(currentElement => currentElement.id !== id);
+
+         element.forEach(currentElement => sumExpenses += currentElement.value);
+
+         this.setState({
+            expenses: element,
+            totalExpense: sumExpenses,
+         })
+      }
+
+      this.setState( prevState => ({
+         totalBudget: prevState.totalIncome-prevState.totalExpense,
       }))
    }
 
@@ -85,14 +136,30 @@ class App extends React.Component {
    showElements = () => {
       switch (this.state.selected) {
          case 'Show All': 
-            let incomes = this.state.incomes.map(currentElement => <ListElement {...currentElement}/>);
-            let expenses = this.state.expenses.map(currentElement => <ListElement {...currentElement}/>);
+            let incomes = this.state.incomes.map(currentElement => <ListElement 
+               key={currentElement.id} 
+               {...currentElement}
+               removeElementClick={this.handleRemoveElementClick}   
+            />);
+            let expenses = this.state.expenses.map(currentElement => <ListElement 
+               key={currentElement.id} 
+               {...currentElement}
+               removeElementClick={this.handleRemoveElementClick}   
+            />);
             return [incomes, expenses];
          case 'Show Incomes':
-            incomes = this.state.incomes.map(currentElement => <ListElement {...currentElement}/>);
+            incomes = this.state.incomes.map(currentElement => <ListElement 
+               key={currentElement.id} 
+               {...currentElement}
+               removeElementClick={this.handleRemoveElementClick}   
+            />);
             return incomes;
          case 'Show Expenses':
-            expenses = this.state.expenses.map(currentElement => <ListElement {...currentElement}/>);
+            expenses = this.state.expenses.map(currentElement => <ListElement 
+               key={currentElement.id} 
+               {...currentElement}
+               removeElementClick={this.handleRemoveElementClick}   
+            />);
             return expenses;
       }    
    }
@@ -290,7 +357,7 @@ const ListElement = (props) => {
    } : { color: '#E6004C', backgroundColor: '#ffb3cc', border: '1px solid #E6004C'};
 
    return(
-      <li style={style}>
+      <li style={style} onClick={() => props.removeElementClick(props.id, props.type)}>
          <strong>{props.type}:</strong>
          <strong style={{color: 'black'}}>{props.name}</strong>
          <i style={{fontWeight: 'bold'}}>{props.value} PLN</i>
